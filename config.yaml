@@ -1,0 +1,13 @@
+# Exemple de configuration pour reddit-comment-cards
+subreddit: AskReddit
+post_count: 1
+comment_count: 10
+sort: top
+theme: futurist
+output_dir: output
+font: 'Orbitron'
+card_style:
+  background_color: '#181A20'
+  accent_color: '#00FFF7'
+  border_radius: 24
+  shadow: true
