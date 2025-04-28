@@ -1,0 +1,6 @@
+# Outputs générés
+output/
+
+# Fichiers d'environnement sensibles
+.env
+.env.example
