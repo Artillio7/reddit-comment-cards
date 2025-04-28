@@ -12,7 +12,7 @@ class CardGenerator:
                  show_likes=True, 
                  faux_usernames=None):
         # TikTok vertical card, mais taille carte réduite (ex: 1080x1350)
-        self.card_width = 1100  # Largeur fixe demandée
+        self.card_width = 1060  # Largeur fixe demandée
         self.size = (self.card_width, None)  # Hauteur dynamique
         # Palette personnalisable
         default_palette = {
@@ -67,8 +67,8 @@ class CardGenerator:
         border_radius = 56
         shadow_offset = 24
         vertical_padding = 50
-        username_x = 50
-        username_y = 30
+        pseudo_padding_left = 40
+        pseudo_padding_bottom = 30
         like_icon_padding_right = 40
         like_icon_padding_bottom = 30
         like_icon_spacing = 12
@@ -88,8 +88,8 @@ class CardGenerator:
         meta_width = meta_bbox[2] - meta_bbox[0]
         meta_height = meta_bbox[3] - meta_bbox[1]
         # Calcul dynamique de la hauteur de la carte
-        content_height = title_height + meta_height + accent_bar_height + 48 + 48
-        card_height = content_height + 2 * vertical_padding
+        content_height = title_height + accent_bar_height + 48
+        card_height = content_height + 2 * vertical_padding + meta_height + 32  # 32px d'espace avant pseudo
         card_width = self.card_width
         # Fond transparent
         image = Image.new('RGBA', (card_width + shadow_offset, card_height + shadow_offset), (0, 0, 0, 0))
@@ -108,12 +108,14 @@ class CardGenerator:
         card_draw.rounded_rectangle([(8,8),(card_width-9,card_height-9)], radius=neon_radius, outline=self.accent_color, width=3)
         # Barre d'accent
         card_draw.rounded_rectangle([(card_padding, card_padding), (card_width-card_padding, card_padding+accent_bar_height)], radius=accent_bar_height//2, fill=self.accent_color)
-        # Pseudo fictif aligné à gauche, 30 px sous le haut
-        card_draw.text((username_x, username_y), meta_text, font=meta_font, fill=(220, 220, 255, 220))
-        # Texte principal sous le pseudo, centré horizontalement
+        # Texte principal centré horizontalement
         text_x = card_width // 2 - title_width // 2
-        text_y = username_y + meta_height + 32
+        text_y = vertical_padding + accent_bar_height + 48
         card_draw.text((text_x, text_y), wrapped_title, font=title_font, fill=self.text_color)
+        # Pseudo fictif en bas à gauche
+        pseudo_x = pseudo_padding_left
+        pseudo_y = card_height - pseudo_padding_bottom - meta_height
+        card_draw.text((pseudo_x, pseudo_y), meta_text, font=meta_font, fill=(220, 220, 255, 220))
         # Likes (en bas à droite)
         if show_likes:
             icon = generate_like_icon(size=64, color=self.like_color)
@@ -146,8 +148,8 @@ class CardGenerator:
         border_radius = 56
         shadow_offset = 24
         vertical_padding = 50
-        username_x = 50
-        username_y = 30
+        pseudo_padding_left = 40
+        pseudo_padding_bottom = 30
         like_icon_padding_right = 40
         like_icon_padding_bottom = 30
         like_icon_spacing = 12
@@ -167,8 +169,8 @@ class CardGenerator:
         meta_width = meta_bbox[2] - meta_bbox[0]
         meta_height = meta_bbox[3] - meta_bbox[1]
         # Calcul dynamique de la hauteur de la carte
-        content_height = comment_height + meta_height + 48
-        card_height = content_height + 2 * vertical_padding
+        content_height = comment_height + 48
+        card_height = content_height + 2 * vertical_padding + meta_height + 32  # 32px d'espace avant pseudo
         card_width = self.card_width
         # Fond transparent
         image = Image.new('RGBA', (card_width + shadow_offset, card_height + shadow_offset), (0, 0, 0, 0))
@@ -185,12 +187,14 @@ class CardGenerator:
         # Effet lumineux (néon)
         neon_radius = border_radius + 12
         card_draw.rounded_rectangle([(8,8),(card_width-9,card_height-9)], radius=neon_radius, outline=self.accent_color, width=3)
-        # Pseudo fictif aligné à gauche, 30 px sous le haut
-        card_draw.text((username_x, username_y), meta_text, font=meta_font, fill=(220, 220, 255, 220))
-        # Texte principal sous le pseudo, centré horizontalement
+        # Texte principal centré horizontalement
         text_x = card_width // 2 - comment_width // 2
-        text_y = username_y + meta_height + 32
+        text_y = vertical_padding + 48
         card_draw.text((text_x, text_y), wrapped_comment, font=body_font, fill=self.text_color)
+        # Pseudo fictif en bas à gauche
+        pseudo_x = pseudo_padding_left
+        pseudo_y = card_height - pseudo_padding_bottom - meta_height
+        card_draw.text((pseudo_x, pseudo_y), meta_text, font=meta_font, fill=(220, 220, 255, 220))
         # Likes (en bas à droite)
         if show_likes:
             icon = generate_like_icon(size=64, color=self.like_color)
