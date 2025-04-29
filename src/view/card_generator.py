@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import os
 import random
+import re
 from view.style_manager import StyleManager
 from view.faux_usernames import FAUX_USERNAMES
 from view.like_icon import generate_like_icon
@@ -137,6 +138,12 @@ class CardGenerator:
     def create_comment_card(self, comment_text, author, upvotes=0, output_path=None, likes=None, pseudo=None):
         from PIL import Image, ImageDraw, ImageFont
         import textwrap
+        # Nettoyage du texte commentaire Reddit
+        comment_text = re.sub(r'u/[A-Za-z0-9_-]+', '', comment_text)
+        comment_text = re.sub(r'r/[A-Za-z0-9_-]+', '', comment_text)
+        comment_text = re.sub(r'\b(Edit|EDIT|edit|op|OP|crosspost)\b.*', '', comment_text)
+        comment_text = re.sub(r'\n{3,}', '\n\n', comment_text)
+        comment_text = comment_text.strip()
         # Pseudo fictif
         pseudo = pseudo or random.choice(self.faux_usernames)
         # Likes stylisés
