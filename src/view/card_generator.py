@@ -8,6 +8,7 @@ from view.like_icon import generate_like_icon
 from model.structures import Post, Comment
 
 class CardGenerator:
+
     def __init__(self, style_manager: StyleManager, 
                  palette=None, 
                  show_likes=True, 
@@ -114,9 +115,10 @@ class CardGenerator:
         text_y = vertical_padding + accent_bar_height + 48
         card_draw.text((text_x, text_y), wrapped_title, font=title_font, fill=self.text_color)
         # Pseudo fictif en bas à gauche
-        pseudo_x = pseudo_padding_left
-        pseudo_y = card_height - pseudo_padding_bottom - meta_height
-        card_draw.text((pseudo_x, pseudo_y), meta_text, font=meta_font, fill=(220, 220, 255, 220))
+        if show_pseudo:
+            pseudo_x = pseudo_padding_left
+            pseudo_y = card_height - pseudo_padding_bottom - meta_height
+            card_draw.text((pseudo_x, pseudo_y), meta_text, font=meta_font, fill=(220, 220, 255, 220))
         # Likes (en bas à droite)
         if show_likes:
             icon = generate_like_icon(size=64, color=self.like_color)
@@ -135,7 +137,7 @@ class CardGenerator:
             return output_path
         return image
 
-    def create_comment_card(self, comment_text, author, upvotes=0, output_path=None, likes=None, pseudo=None):
+    def create_comment_card(self, comment_text, author, upvotes=0, output_path=None, likes=None, pseudo=None, show_likes=True, show_pseudo=True):
         from PIL import Image, ImageDraw, ImageFont
         import textwrap
         # Nettoyage du texte commentaire Reddit
@@ -147,7 +149,7 @@ class CardGenerator:
         # Pseudo fictif
         pseudo = pseudo or random.choice(self.faux_usernames)
         # Likes stylisés
-        show_likes = self.show_likes if likes is None else bool(likes)
+        effective_show_likes = show_likes and (likes is not None or upvotes)
         likes_val = likes if likes is not None else upvotes if upvotes else random.randint(50, 2000)
         likes_str = f"{likes_val/1000:.1f}k" if likes_val >= 1000 else str(likes_val)
         # Mise en page
@@ -199,9 +201,10 @@ class CardGenerator:
         text_y = vertical_padding + 48
         card_draw.text((text_x, text_y), wrapped_comment, font=body_font, fill=self.text_color)
         # Pseudo fictif en bas à gauche
-        pseudo_x = pseudo_padding_left
-        pseudo_y = card_height - pseudo_padding_bottom - meta_height
-        card_draw.text((pseudo_x, pseudo_y), meta_text, font=meta_font, fill=(220, 220, 255, 220))
+        if show_pseudo:
+            pseudo_x = pseudo_padding_left
+            pseudo_y = card_height - pseudo_padding_bottom - meta_height
+            card_draw.text((pseudo_x, pseudo_y), meta_text, font=meta_font, fill=(220, 220, 255, 220))
         # Likes (en bas à droite)
         if show_likes:
             icon = generate_like_icon(size=64, color=self.like_color)

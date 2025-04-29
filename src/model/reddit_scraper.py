@@ -67,15 +67,16 @@ class RedditScraper:
             if len(top_comments) < 3:
                 continue  # On veut au moins 3 bons commentaires par post
             comment_objs = [Comment(author=getattr(c.author, 'name', '[deleted]'), body=c.body, score=c.score, id=c.id) for c in top_comments]
-            post_obj = Post(
+            result.append(Post(
                 title=submission.title,
                 author=getattr(submission.author, 'name', '[deleted]'),
                 score=submission.score,
                 id=submission.id,
-                subreddit=subreddit.display_name if hasattr(subreddit, 'display_name') else str(subreddit),
-                comments=comment_objs
-            )
-            result.append(post_obj)
+                subreddit=submission.subreddit.display_name,
+                comments=comment_objs,
+                selftext=getattr(submission, 'selftext', ''),
+                url=getattr(submission, 'url', '')
+            ))
             if len(result) >= post_count:
                 break
         return result

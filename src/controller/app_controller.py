@@ -91,5 +91,55 @@ class AppController:
                 for idx, comment in enumerate(post.comments[:10]):
                     comment_path = os.path.join(post_dir, f'comment_{idx+1}.png')
                     self.card_generator.create_comment_card(comment.body, comment.author, comment.score, comment_path)
+                # Création du fichier contextuel Markdown
+                post_url = f'https://www.reddit.com/r/{post.subreddit}/comments/{post.id}/'
+                # Recherche d'URL vidéo dans le titre ou les 10 premiers commentaires
+                video_urls = []
+                url_pattern = r'(https?://[\w\.-]+\.(?:mp4|mov|webm|mkv|avi|youtube\.com|youtu\.be|vimeo\.com|twitter\.com|tiktok\.com)[^\s]*)'
+                if re.search(url_pattern, post.title, re.IGNORECASE):
+                    video_urls.extend(re.findall(url_pattern, post.title, re.IGNORECASE))
+                for c in post.comments[:10]:
+                    video_urls.extend(re.findall(url_pattern, c.body, re.IGNORECASE))
+                video_urls = list(set(video_urls))
+                video_urls_str = '\n'.join(video_urls) if video_urls else 'Aucune vidéo'
+                # Description contextuelle
+                description = getattr(post, 'description', None) or post.title
+                # Section commentaires
+                commentaires_md = ''
+                for i, c in enumerate(post.comments[:10]):
+                    commentaires_md += f"- {i+1}. {c.body.strip().replace(chr(10), ' ')}\n"
+                # Contexte viral (simple résumé basé sur le titre et le nombre de commentaires)
+                contexte_md = f"Ce post a généré de nombreux commentaires et réactions sur le sujet : '{post.title}'. Il semble avoir un effet viral ou susciter un débat important dans la communauté r/{post.subreddit}."
+                # Bloc story/contexte narratif (jamais d'image ni url markdown)
+                story_block = ''
+                story_img_path = os.path.join(post_dir, 'story.png')
+                # Si selftext existe, affiche le texte brut (jamais d’image ni d’URL)
+                if hasattr(post, 'selftext') and post.selftext and post.selftext.strip():
+                    self.card_generator.create_comment_card(post.selftext.strip(), post.author, output_path=story_img_path, likes=None, pseudo='', show_likes=False)
+                    story_block = f"\n\n**Story complète ou contexte narratif :**\n\n{post.selftext.strip()}\n"
+                # Si submission.url existe (image ou vidéo), ajoute l’URL brute dans le bloc markdown (même si selftext existe)
+                if hasattr(post, 'url') and post.url:
+                    story_block += f"\n\n**Lien du contenu (image ou vidéo) :**\n{post.url}\n"
+                # Si rien, fallback sur le titre
+                if not story_block.strip():
+                    story_block = f"\n\n**Story complète ou contexte narratif :**\n\n{post.title}\n"
+                # Construction du markdown
+                md = f"""---
+**Titre** : {post.title}
+**Subreddit** : r/{post.subreddit}
+**Tri** : {opt['sorting']}
+**Période** : {opt.get('timeframe','')}
+**URL du post** : {post_url}
+**URL vidéo (si présente)** : {video_urls_str}
+**Description** : {description}
+**Commentaires** :
+{commentaires_md}
+**Contexte** : {contexte_md}
+{story_block}
+"""
+                context_path = os.path.join(post_dir, f"context_{post.id}.md")
+                with open(context_path, "w", encoding="utf-8") as f:
+                    f.write(md)
+
             print(f"\nGénération terminée ! Images sauvegardées dans {self.output_dir}\n")
             input("Appuyez sur Entrée pour continuer...")

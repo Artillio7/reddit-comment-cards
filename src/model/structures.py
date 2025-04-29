@@ -17,3 +17,5 @@ class Post:
     id: str
     subreddit: str
     comments: List[Comment]
+    selftext: str = ''  # Texte complet du post (histoire, contexte)
+    url: str = ''       # URL du post (pour image, vidéo, etc)
