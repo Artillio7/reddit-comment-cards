@@ -54,13 +54,13 @@ class CardGenerator:
                 return str(font_path)
         return "arial.ttf"
 
-    def create_title_card(self, title, subreddit, author, output_path=None, likes=None, pseudo=None):
+    def create_title_card(self, title, subreddit, author, output_path=None, likes=None, pseudo=None, show_likes=True, show_pseudo=True):
         from PIL import Image, ImageDraw, ImageFont
         import textwrap
         # Pseudo fictif
         pseudo = pseudo or random.choice(self.faux_usernames)
         # Likes stylisés
-        show_likes = self.show_likes if likes is None else bool(likes)
+        show_likes = show_likes
         likes_val = likes if likes is not None else random.randint(120, 4200)
         likes_str = f"{likes_val/1000:.1f}k" if likes_val >= 1000 else str(likes_val)
         # Mise en page

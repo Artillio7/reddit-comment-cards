@@ -87,7 +87,7 @@ class AppController:
                 post_dir = os.path.join(self.output_dir, folder_name)
                 os.makedirs(post_dir, exist_ok=True)
                 title_path = os.path.join(post_dir, 'title.png')
-                self.card_generator.create_title_card(post.title, getattr(post, 'subreddit', opt['subreddit']), post.author, title_path)
+                self.card_generator.create_title_card(post.title, getattr(post, 'subreddit', opt['subreddit']), post.author, title_path, show_likes=True, show_pseudo=True)
                 for idx, comment in enumerate(post.comments[:10]):
                     comment_path = os.path.join(post_dir, f'comment_{idx+1}.png')
                     self.card_generator.create_comment_card(comment.body, comment.author, comment.score, comment_path)
@@ -138,6 +138,7 @@ class AppController:
 {story_block}
 """
                 context_path = os.path.join(post_dir, f"context_{post.id}.md")
+                os.makedirs(os.path.dirname(context_path), exist_ok=True)
                 with open(context_path, "w", encoding="utf-8") as f:
                     f.write(md)
 
