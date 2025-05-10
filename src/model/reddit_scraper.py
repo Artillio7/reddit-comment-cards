@@ -8,17 +8,18 @@ load_dotenv()
 
 class RedditScraper:
     def __init__(self, config_path: str = None):
-        # Charger la configuration YAML
-        config_file = config_path or os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config.yaml')
-        with open(config_file, 'r', encoding='utf-8') as f:
-            self.config = yaml.safe_load(f)
+        # Configuration par défaut
+        self.config = {
+            'output_dir': 'output',
+            'max_comments': 10,
+            'min_comment_length': 30
+        }
         
         # Préparer l'API Reddit
         self.reddit = praw.Reddit(
-            client_id=os.getenv('REDDIT_CLIENT_ID', ''),
-            client_secret=os.getenv('REDDIT_CLIENT_SECRET', ''),
+            client_id=os.getenv('REDDIT_CLIENT_ID'),
+            client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
             user_agent=os.getenv('REDDIT_USER_AGENT', 'reddit-comment-cards'),
-            username=os.getenv('REDDIT_USERNAME', ''),
             password=os.getenv('REDDIT_PASSWORD', '')
         )
 
