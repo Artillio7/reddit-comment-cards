@@ -3,6 +3,7 @@ from model.reddit_scraper import RedditScraper
 from view.card_generator import CardGenerator
 from view.style_manager import StyleManager
 from model.category_config import CONTENT_CATEGORIES
+from utils.file_utils import sanitize_filename
 
 class AppController:
     def __init__(self, config_path=None):
@@ -11,15 +12,17 @@ class AppController:
         self.card_generator = CardGenerator(self.style_manager)
         self.output_dir = self.scraper.config.get('output_dir', 'output')
         os.makedirs(self.output_dir, exist_ok=True)
+        
+        # Référence à la fonction sanitize_filename
+        self.sanitize_filename = sanitize_filename
 
     def select_and_run(self):
         import re
         import time
         clear = lambda: os.system('cls' if os.name == 'nt' else 'clear')
         def clean_title(title):
-            cleaned = re.sub(r'[\\/:*?"<>|]', '', title)
-            cleaned = cleaned.strip().replace('\n', ' ')
-            return cleaned[:60] if len(cleaned) > 60 else cleaned
+            # Utiliser la fonction sanitize_filename plus robuste
+            return self.sanitize_filename(title)
         while True:
             clear()
             print("\n" + "=" * 60)
@@ -83,14 +86,25 @@ class AppController:
                 min_comment_length=30
             )
             for post in posts:
+                # Nettoyer le titre pour créer un nom de dossier valide
                 folder_name = clean_title(post.title)
+                # Limiter la longueur du nom de dossier pour éviter les problèmes de chemin trop long
+                if len(folder_name) > 50:
+                    folder_name = folder_name[:50]
+                # S'assurer qu'il n'y a pas de caractères problématiques restants
+                folder_name = folder_name.replace('\\', '_').replace('/', '_')
+                # Créer le dossier de sortie
                 post_dir = os.path.join(self.output_dir, folder_name)
                 os.makedirs(post_dir, exist_ok=True)
                 title_path = os.path.join(post_dir, 'title.png')
-                self.card_generator.create_title_card(post.title, getattr(post, 'subreddit', opt['subreddit']), post.author, title_path, show_likes=True, show_pseudo=True)
+                # S'assurer que l'auteur est correctement passé à la fonction create_title_card
+                author_name = str(post.author) if post.author else None
+                self.card_generator.create_title_card(post.title, getattr(post, 'subreddit', opt['subreddit']), author_name, title_path, show_likes=True, show_pseudo=True)
                 for idx, comment in enumerate(post.comments[:10]):
                     comment_path = os.path.join(post_dir, f'comment_{idx+1}.png')
-                    self.card_generator.create_comment_card(comment.body, comment.author, comment.score, comment_path)
+                    # S'assurer que l'auteur est correctement passé à la fonction create_comment_card
+                    author_name = str(comment.author) if comment.author else None
+                    self.card_generator.create_comment_card(comment.body, author_name, comment.score, comment_path, show_likes=True, show_pseudo=True)
                 # Création du fichier contextuel Markdown
                 post_url = f'https://www.reddit.com/r/{post.subreddit}/comments/{post.id}/'
                 # Recherche d'URL vidéo dans le titre ou les 10 premiers commentaires

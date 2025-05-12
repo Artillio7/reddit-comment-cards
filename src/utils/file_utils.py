@@ -2,16 +2,21 @@ def sanitize_filename(filename: str) -> str:
     """
     Nettoie un nom de fichier/dossier en supprimant les caractères problématiques
     """
-    # Remplace les espaces par des underscores
-    filename = filename.replace(' ', '_')
-    # Supprime les caractères spéciaux
-    filename = filename.replace('?', '').replace('!', '').replace(':', '').replace(';', '')
-    filename = filename.replace(',', '').replace('.', '').replace('/', '').replace('\\', '')
-    filename = filename.replace('*', '').replace('|', '').replace('"', '').replace('<', '')
-    filename = filename.replace('>', '').replace('(', '').replace(')', '').replace('[', '')
-    filename = filename.replace(']', '')
+    import re
+    # Utiliser une regex pour remplacer tous les caractères non alphanumériques par des underscores
+    # Cela inclut les espaces, les caractères spéciaux, les accents, etc.
+    safe_filename = re.sub(r'[^\w\s-]', '_', filename)
+    # Remplacer les espaces par des underscores
+    safe_filename = re.sub(r'\s+', '_', safe_filename)
+    # Supprimer les underscores multiples
+    safe_filename = re.sub(r'_+', '_', safe_filename)
+    # Supprimer les underscores en début et fin de chaîne
+    safe_filename = safe_filename.strip('_')
+    # Si le nom est vide après nettoyage, utiliser un nom par défaut
+    if not safe_filename:
+        safe_filename = 'unnamed_file'
     # Limite la longueur
-    return filename[:255]
+    return safe_filename[:255]
 
 def generate_slug(title: str) -> str:
     """
